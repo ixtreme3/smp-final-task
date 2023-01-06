@@ -7,7 +7,7 @@ import './styles.css';
 
 function App() {
     const [image, setImage] = useState(null);
-    const [blogContent, setBlogContent] = useState(null);
+    const [blogContent, setBlogContent] = useState([{heading: "", content: ""}]);
 
     const fetchImage = async () => {
         const res = await fetch("https://fakeface.rest/face/view");
@@ -16,11 +16,20 @@ function App() {
         setImage(imageObjectURL);
     };
 
+    function makeBlogContent(result) {
+        let arr = result.split("."); // массив из 15 предложений
+        setBlogContent([
+            {heading: arr[0], content: arr.slice(0, 5).join(". ")},
+            {heading: arr[5], content: arr.slice(5, 10).join(". ")},
+            {heading: arr[10], content: arr.slice(10, 15).join(". ")},
+        ])
+        console.log(blogContent)
+    }
+
     const fetchBlogContent = async () => {
-        fetch("https://fish-text.ru/get?number=5")
+        fetch("https://fish-text.ru/get?number=15")
             .then(response => response.json())
-            .then(result => {setBlogContent(result)
-                console.log(result.text.split(". "))})
+            .then(result => makeBlogContent(result.text))
     };
 
     useEffect(() => {
@@ -31,17 +40,15 @@ function App() {
   return (
       <div className="blog">
           <Header image={image} />
-          <button className="add-content-button"></button>
+          <button className="add-content-button" onClick={fetchBlogContent}>Сгенерировать посты</button>
           <div className="blog-body">
-              <BlogPost image={image}>
-                  <BlogComment image={image} />
-              </BlogPost>
-              <BlogPost image={image}>
-                  <BlogComment image={image} />
-              </BlogPost>
-              <BlogPost image={image}>
-                  <BlogComment image={image} />
-              </BlogPost>
+              {
+                  blogContent.map((elem) =>
+                      <BlogPost text={elem} image={image} >
+                          <BlogComment image={image} />
+                      </BlogPost>
+                  )
+              }
           </div>
       </div>
   );
